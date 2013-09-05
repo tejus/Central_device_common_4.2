@@ -53,6 +53,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.telephony.default_network=3 \
 	mobiledata.interfaces=rmnet0 \
 
+# SGX540 is slower with the scissor optimization enabled
+PRODUCT_PROPERTY_OVERRIDES += \
+       ro.hwui.disable_scissor_opt=true
+
 DEVICE_PACKAGE_OVERLAYS += device/moto/jordan-common/overlay
 
 # Permissions
