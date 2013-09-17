@@ -82,7 +82,7 @@ PRODUCT_PACKAGES += \
 	com.android.future.usb.accessory
 
 # FIXME in repo 
-PRODUCT_PACKAGES += rild Dialer
+PRODUCT_PACKAGES += rild
 
 # ICS sound
 PRODUCT_PACKAGES += \
