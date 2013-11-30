@@ -63,6 +63,10 @@ PRODUCT_COPY_FILES += \
 	${device_path}/releasetools/addon.d/80-battd.sh:system/addon.d/80-battd.sh \
 	${device_path}/releasetools/addon.d/70-bootmenu.sh:system/addon.d/70-bootmenu.sh \
 
+# libbt-vendor.so
+PRODUCT_COPY_FILES += \
+	${device_path}/temp/libbt-vendor.so:system/vendor/lib/libbt-vendor.so \
+
 # copy all others kernel modules under the "modules" directory to system/lib/modules
 PRODUCT_COPY_FILES += $(shell test -d device/moto/jordan-common/modules/prebuilt && \
 	find device/moto/jordan-common/modules/prebuilt -name '*.ko' \
