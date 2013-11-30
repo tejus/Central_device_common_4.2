@@ -60,7 +60,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
        ro.hwui.disable_scissor_opt=true
 
 PRODUCT_PROPERTY_OVERRIDES += \
-	ro.config.low_ram=true  \
+	ro.config.low_ram=false  \
 	dalvik.vm.jit.codecachesize=0 \
 
 DEVICE_PACKAGE_OVERLAYS += device/moto/jordan-common/overlay
