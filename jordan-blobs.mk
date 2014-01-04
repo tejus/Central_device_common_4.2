@@ -70,10 +70,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
 	${device_path}/temp/libbt-vendor.so:system/vendor/lib/libbt-vendor.so \
 
-# temp
-PRODUCT_COPY_FILES += \
-	${device_path}/temp/hostapd:system/bin/hostapd \
-
 # copy all others kernel modules under the "modules" directory to system/lib/modules
 PRODUCT_COPY_FILES += $(shell test -d device/moto/jordan-common/modules/prebuilt && \
 	find device/moto/jordan-common/modules/prebuilt -name '*.ko' \

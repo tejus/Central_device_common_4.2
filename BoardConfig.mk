@@ -54,7 +54,7 @@ TARGET_ARCH_HAVE_NEON := true
 # Wifi related defines
 USES_TI_MAC80211 := true
 COMMON_GLOBAL_CFLAGS += -DUSES_TI_MAC80211
-WPA_SUPPLICANT_VERSION           := VER_0_8_X
+WPA_SUPPLICANT_VERSION           := VER_0_8_X_TI
 BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_wl12xx
 BOARD_HOSTAPD_DRIVER             := NL80211
@@ -67,7 +67,6 @@ WIFI_DRIVER_MODULE_NAME          := "wl12xx_sdio"
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
-TARGET_CUSTOM_BLUEDROID := ../../../device/moto/jordan-common/bluedroid.c
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/moto/jordan-common/bluetooth
 BOARD_HAVE_BLUETOOTH_TI := true
 # Usb Specific
@@ -117,7 +116,6 @@ BOARD_UMS_LUNFILE := /sys/class/android_usb/f_mass_storage/lun/file
 
 # Egl Specific
 USE_OPENGL_RENDERER := true
-BOARD_EGL_CFG := device/moto/jordan-common/egl.cfg
 BOARD_USE_YUV422I_DEFAULT_COLORFORMAT := true
 ENABLE_WEBGL := true
 COMMON_GLOBAL_CFLAGS += -DSYSTEMUI_PBSIZE_HACK=1
@@ -150,11 +148,6 @@ BOARD_HAL_STATIC_LIBRARIES := libhealthd.omap3
 # Release tool
 TARGET_PROVIDES_RELEASETOOLS := true
 TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := device/moto/jordan-common/releasetools/common_ota_from_target_files
-
-# adb root
-ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
-ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
-ADDITIONAL_DEFAULT_PROPERTIES += ro.allow.mock.location=1
 
 ext_modules:
 	make -C $(TARGET_KERNEL_MODULES_EXT) modules KERNEL_DIR=$(KERNEL_OUT) ARCH=arm CROSS_COMPILE="arm-eabi-"
