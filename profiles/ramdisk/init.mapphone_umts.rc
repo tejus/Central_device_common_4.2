@@ -25,6 +25,7 @@ on fs
 # Mount mmc partitions
 
     mount_all ./fstab.mapphone_umts
+    swapon_all /fstab.mapphone_umts
 
     mkdir /pds 0775 system system
     exec /system/bootmenu/script/pdsbackup.sh
@@ -98,6 +99,9 @@ on post-fs
 # Tweaks
     # DSS - disable tearing elimination
     write /sys/devices/omapdss/display0/tear_elim 0  
+
+# 4.4 requires this
+    chmod 0644 /proc/cmdline
 
 on post-fs-data
 
