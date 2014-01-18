@@ -1,4 +1,4 @@
-#<device> <mnt_point> <fstype> <mnt_flags and options> <fs_mgr_flags>
+# device mount-point fstype mountoptions options
 /dev/block/mmcblk1p24 /cache ext4 defaults defaults
 /dev/block/mmcblk1p25 /data ext4 defaults defaults
 /dev/block/mmcblk1p21 /system ext3 defaults defaults
