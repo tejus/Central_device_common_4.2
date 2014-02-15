@@ -1,3 +1,5 @@
+#import /init.bluetooth.rc
+
 on init 
 
     export DSP_PATH /system/lib/dsp
@@ -25,7 +27,7 @@ on fs
 # Mount mmc partitions
 
     mount_all ./fstab.mapphone_umts
-    #swapon_all /fstab.mapphone_umts
+    #swapon_all /fstab.mapphone_umts # For enable zRam
 
     mkdir /pds 0775 system system
     exec /system/bootmenu/script/pdsbackup.sh
@@ -36,18 +38,29 @@ on fs
 
 on post-fs
 
-    # Load kernel modules
-    insmod /system/lib/modules/netmux.ko
-    insmod /system/lib/modules/netmux_linkdriver.ko
-    insmod /system/lib/modules/modem_pm_driver.ko
+# Load generic modules
+    insmod /system/lib/modules/compat.ko
     insmod /system/lib/modules/nls_utf8.ko
     insmod /system/lib/modules/cifs.ko
 
-# Load wifi drivers (all except wl12xx_sdio)
-    insmod /system/lib/modules/compat.ko
+# Load Motorola Modem modules
+    insmod /system/lib/modules/netmux.ko
+    insmod /system/lib/modules/netmux_linkdriver.ko
+    insmod /system/lib/modules/modem_pm_driver.ko
+
+# Load Bluetooth drivers 
+#    insmod /system/lib/modules/bluetooth.ko
+#    insmod /system/lib/modules/hci_uart.ko
+#    insmod /system/lib/modules/rfcomm.ko
+#    insmod /system/lib/modules/bnep.ko
+
+# Load WiFi drivers
+    insmod /system/lib/modules/cfg80211.ko
+    insmod /system/lib/modules/mac80211.ko
     insmod /system/lib/modules/cfg80211.ko
     insmod /system/lib/modules/mac80211.ko
     insmod /system/lib/modules/wl12xx.ko
+#   insmod /system/lib/modules/wlcore.ko #For Kernel backports
 
 # Backward compatibility
     symlink /dev /dev/netmux
@@ -58,12 +71,6 @@ on post-fs
 
 # Overclock after 2ndboot.
     exec /system/bootmenu/script/overclock.sh
-
-# Busybox
-    mkdir /data/local/tmp 0777 system shell
-    export HISTFILE /data/local/tmp/.ash_history
-    export HISTFILESIZE 1000
-    export ENV /system/etc/profile
 
 # Mount tmp, we dont have swap, use ramfs which can grow if required
     mkdir /tmp
@@ -77,9 +84,6 @@ on post-fs
     write /sys/devices/platform/ehci-omap.0/usb1/power/autosuspend 0
     write /sys/devices/platform/ehci-omap.0/usb1/1-3/power/level auto
     write /sys/devices/platform/ehci-omap.0/usb1/1-3/power/autosuspend 0
-    # Disable a system-wide task dump on OOM in default
-    write /proc/sys/vm/oom_dump_tasks 0
-    write /proc/sys/fs/suid_dumpable 2
     # Power Management
     write /sys/power/sr_vdd1_autocomp 1
     write /sys/power/sr_vdd2_autocomp 1
@@ -91,6 +95,7 @@ on post-fs
     chown system system /sys/class/timed_output/vibrator/sweep
     chmod 0660 /sys/class/timed_output/vibrator/enable
     chmod 0660 /sys/class/timed_output/vibrator/sweep
+
 # bluetooth power up/down interface (wl127x Bluetooth and hci0)
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
@@ -99,9 +104,6 @@ on post-fs
 # Tweaks
     # DSS - disable tearing elimination
     write /sys/devices/omapdss/display0/tear_elim 0  
-
-# 4.4 requires this
-    chmod 0644 /proc/cmdline
 
 on post-fs-data
 
@@ -128,6 +130,7 @@ on post-fs-data
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     mkdir /tmp/commdrv 0770 radio radio
     mkdir /data/local/hwui.deny
+    mkdir /data/misc/hcid 0770 bluetooth bluetooth
 
     chown radio radio /data/bp_nvm
     chown radio radio /pds/bp_nvm
@@ -191,6 +194,12 @@ on boot
     chown system system /sys/devices/system/cpu/cpufreq/interactive/boostpulse
     chown system system /sys/devices/system/cpu/cpufreq/interactive/input_boost
     chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/input_boost
+
+    # Interactive Tunables
+    chmod 0664 /sys/devices/system/cpu/cpufreq/interactive/target_loads
+    chmod 0664 /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay
+    write /sys/devices/system/cpu/cpufreq/interactive/target_loads "95 600000:50"
+    write /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay "20000 600000:40000" 
 
     # Charge only mode services.
     exec /system/bin/mot_boot_mode
@@ -258,12 +267,6 @@ service panic_daemon /system/bin/panic_daemon
     socket panic_daemon stream 660 radio radio
     onrestart exec /system/bin/handle_bp_panic.sh
 
-service secclkd /system/bin/secclkd
-    class main
-    user system
-    group system radio
-    oneshot
-
 # Ecompass daemon
 service akmd2 /system/bin/akmd2
     class main
@@ -275,6 +278,7 @@ service wifi_calibrator /system/bin/sh /system/bin/wifical.sh
     class main
     group wifi
     oneshot
+
 service wpa_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
     -I/system/etc/wifi/wpa_supplicant_overlay.conf \
@@ -367,6 +371,67 @@ service fuse_sdcard0 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/sdcard0
 service fuse_usbdisk /system/bin/sdcard -u 1023 -g 1023 /mnt/media_rw/usbdisk /storage/usbdisk
     class late_start
     disabled
+
+########## Bluez 4 Services #############
+# Bluetooth services.
+#service hciattach /system/bin/hciattach -n -t 10 /dev/ttyS1 texasalt 3000000 flow
+#    class main
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+
+#service dbus /system/bin/dbus-daemon --system --nofork
+#    class main
+#    socket dbus stream 660 bluetooth bluetooth
+#    user bluetooth
+#    group bluetooth net_bt_admin
+
+#service bluetoothd /system/bin/bluetoothd -n
+#    class main
+#    socket bluetooth stream 660 bluetooth bluetooth
+#    socket dbus_bluetooth stream 660 bluetooth bluetooth
+#    # init.rc does not yet support applying capabilities, so run as root and
+#    # let bluetoothd drop uid to bluetooth with the right linux capabilities
+#    group bluetooth net_bt_admin misc
+#    disabled
+########## End Bluez 4 Services #############
+
+########## Bluez 5 Services #############
+#service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd
+#    class main
+#    socket bluetooth stream 660 bluetooth bluetooth
+#    socket dbus_bluetooth stream 660 bluetooth bluetooth
+    # init.rc does not yet support applying capabilities, so run as root and
+    # let bluetoothd drop uid to bluetooth with the right linux capabilities
+#    group bluetooth net_bt_admin misc net_admin radio
+#    disabled
+#    oneshot
+
+#service bluetoothd-snoop /system/bin/logwrapper /system/bin/bluetoothd-snoop
+#    class main
+    # init does not yet support setting capabilities so run as root,
+    # bluetoothd-snoop drops unneeded linux capabilities
+#    group nobody
+#    disabled
+#    oneshot
+
+#on property:bluetooth.start=daemon
+#    setprop bluetooth.start none
+#    start bluetoothd
+
+#on property:bluetooth.stop=daemon
+#    setprop bluetooth.stop none
+#    stop bluetoothd
+
+#on property:bluetooth.start=snoop
+#    setprop bluetooth.start none
+#    start bluetoothd-snoop
+
+#on property:bluetooth.stop=snoop
+#    setprop bluetooth.stop none
+#    stop bluetoothd-snoop
+########## End Bluez 5 #############
+
 
 # sysinit (/system/etc/init.d)
 service sysinit /system/bin/sysinit
