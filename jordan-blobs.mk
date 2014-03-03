@@ -67,7 +67,6 @@ PRODUCT_COPY_FILES += \
 # Backup list system (addon.d)
 PRODUCT_COPY_FILES += \
 	${device_path}/releasetools/addon.d/60-baseband.sh:system/addon.d/60-baseband.sh \
-	${device_path}/releasetools/addon.d/70-bootmenu.sh:system/addon.d/70-bootmenu.sh \
 
 # libbt-vendor.so
 PRODUCT_COPY_FILES += \
