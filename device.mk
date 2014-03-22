@@ -49,7 +49,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	dalvik.vm.debug.alloc=0 \
 	persist.sys.root_access=3 \
 	ro.config.low_ram=true  \
-	dalvik.vm.jit.codecachesize=0
+	dalvik.vm.jit.codecachesize=0 \
+	ro.input.noresample=1
 
 # wifi props
 PRODUCT_PROPERTY_OVERRIDES += \
