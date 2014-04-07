@@ -8,8 +8,11 @@ on init
     export EXTERNAL_STORAGE /storage/sdcard0
 
     mkdir /storage/sdcard0 0000 system system
+    mkdir /storage/usbdisk 0700 root root
     symlink /storage/sdcard0 /sdcard
     symlink /storage/sdcard0 /mnt/sdcard
+    symlink /storage/usbdisk /usbdisk
+    symlink /storage/usbdisk /mnt/usbdisk
 
 on fs
 
@@ -320,4 +323,3 @@ service fmradio /system/bin/fmradioserver
     disabled
     user system
     group bluetooth net_bt_admin net_raw net_admin misc
-
