@@ -471,6 +471,17 @@ def WriteFullOTAPackage(input_zip, output_zip):
   script.SetPermissionsRecursive("/system/bootstrap/script", 0, 0, 0755, 0755, None, None)
   script.SetPermissions("/system/etc/motorola/comm_drv/commdrv_fs.sh", 0, 0, 0755, None, None)
 
+# Install correct Media-Profiles
+  script.AppendExtra('package_extract_file("system/bin/camera_detect", "tmp/camera_detect");')
+  script.SetPermissions("/tmp/camera_detect", 0, 0, 0777, None, None)
+  script.AppendExtra('run_program("/tmp/camera_detect");')
+#  if (is_substring("mt9p012", getprop("ro.camera.type")))
+#    script.RunProgramm("/sbin/sh", "-c", "busybox mv /system/etc/media_profiles_mb526.xml /system/etc/media_profiles.xml")
+#  elif (is_substring("camise", getprop("ro.camera.type")))
+#    script.RunProgramm("/sbin/sh", "-c", "busybox mv /system/etc/media_profiles_mb525.xml /system/etc/media_profiles.xml")
+  script.AppendExtra('package_extract_file("system/etc/media_profiles_mb526.xml", "system/etc/media_profiles.xml");')
+  script.DeleteFiles(["/system/etc/media_profiles_mb526.xml", "/system/etc/media_profiles_mb525.xml"])
+
 # libaudio link fix
   script.MakeSymlink("/system/lib/hw/audio.a2dp.default.so", "/system/lib/liba2dp.so")
   script.ShowProgress(0.2, 0)
